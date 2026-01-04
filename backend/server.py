@@ -76,6 +76,12 @@ class H1BJob(BaseModel):
     posted_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     employment_type: str = "Full-time"
     lca_case_number: Optional[str] = None
+    # External job fields
+    source: Optional[str] = None  # arbeitnow, greenhouse, linkedin, indeed, etc.
+    external_url: Optional[str] = None  # Original job posting URL
+    external_id: Optional[str] = None  # Unique ID from source
+    is_external: Optional[bool] = False  # True for jobs from external APIs
+    last_synced: Optional[str] = None  # Last sync timestamp
 
 class Company(BaseModel):
     model_config = ConfigDict(extra="ignore")
