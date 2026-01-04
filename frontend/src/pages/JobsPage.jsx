@@ -31,6 +31,7 @@ export default function JobsPage() {
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [user, setUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   // Filter states
   const [search, setSearch] = useState(searchParams.get("search") || "");
