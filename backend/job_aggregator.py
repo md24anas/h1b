@@ -159,6 +159,129 @@ class JobAggregator:
             logger.error(f"Error fetching from USAJOBS: {e}")
             return []
     
+    async def fetch_jsearch_jobs(self, api_key: Optional[str] = None) -> List[Dict]:
+        """Fetch jobs from JSearch API (RapidAPI - Google Jobs)"""
+        if not api_key:
+            logger.info("JSearch API key not provided, skipping...")
+            return []
+        
+        try:
+            logger.info("Fetching jobs from JSearch (Google Jobs)...")
+            
+            headers = {
+                "X-RapidAPI-Key": api_key,
+                "X-RapidAPI-Host": "jsearch.p.rapidapi.com"
+            }
+            
+            all_jobs = []
+            
+            # Search multiple queries to get diverse jobs
+            queries = [
+                "software engineer USA",
+                "data scientist USA",
+                "web developer USA",
+                "product manager USA",
+                "devops engineer USA"
+            ]
+            
+            for query in queries:
+                try:
+                    params = {
+                        "query": query,
+                        "page": "1",
+                        "num_pages": "3",  # Fetch 3 pages per query
+                        "date_posted": "month"  # Jobs from last month
+                    }
+                    
+                    response = await self.http_client.get(
+                        "https://jsearch.p.rapidapi.com/search",
+                        headers=headers,
+                        params=params
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        jobs = data.get("data", [])
+                        all_jobs.extend(jobs)
+                        logger.info(f"Fetched {len(jobs)} jobs for query: {query}")
+                    else:
+                        logger.warning(f"JSearch API error for query '{query}': {response.status_code}")
+                    
+                    # Small delay to avoid rate limiting
+                    await asyncio.sleep(0.5)
+                    
+                except Exception as e:
+                    logger.error(f"Error fetching JSearch query '{query}': {e}")
+                    continue
+            
+            logger.info(f"Total JSearch jobs fetched: {len(all_jobs)}")
+            return all_jobs
+            
+        except Exception as e:
+            logger.error(f"Error fetching from JSearch: {e}")
+            return []
+    
+    async def fetch_adzuna_jobs(self, app_id: Optional[str] = None, app_key: Optional[str] = None) -> List[Dict]:
+        """Fetch jobs from Adzuna API (free tier - 5000 requests/month)"""
+        if not app_id or not app_key:
+            logger.info("Adzuna API credentials not provided, skipping...")
+            return []
+        
+        try:
+            logger.info("Fetching jobs from Adzuna...")
+            
+            all_jobs = []
+            
+            # Search multiple locations and keywords
+            searches = [
+                {"what": "software engineer", "where": "New York"},
+                {"what": "software engineer", "where": "San Francisco"},
+                {"what": "software engineer", "where": "Seattle"},
+                {"what": "data scientist", "where": "New York"},
+                {"what": "data scientist", "where": "California"},
+                {"what": "web developer", "where": "Texas"},
+                {"what": "product manager", "where": "New York"},
+                {"what": "devops engineer", "where": "Washington"},
+            ]
+            
+            for search in searches:
+                try:
+                    params = {
+                        "app_id": app_id,
+                        "app_key": app_key,
+                        "what": search["what"],
+                        "where": search["where"],
+                        "results_per_page": "50",
+                        "content-type": "application/json"
+                    }
+                    
+                    response = await self.http_client.get(
+                        "https://api.adzuna.com/v1/api/jobs/us/search/1",
+                        params=params
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        jobs = data.get("results", [])
+                        all_jobs.extend(jobs)
+                        logger.info(f"Fetched {len(jobs)} jobs for {search['what']} in {search['where']}")
+                    else:
+                        logger.warning(f"Adzuna API error: {response.status_code}")
+                    
+                    # Delay to respect rate limits
+                    await asyncio.sleep(0.3)
+                    
+                except Exception as e:
+                    logger.error(f"Error fetching Adzuna search {search}: {e}")
+                    continue
+            
+            logger.info(f"Total Adzuna jobs fetched: {len(all_jobs)}")
+            return all_jobs
+            
+        except Exception as e:
+            logger.error(f"Error fetching from Adzuna: {e}")
+            return []
+    
     async def fetch_greenhouse_jobs(self, board_tokens: List[str]) -> List[Dict]:
         """Fetch jobs from Greenhouse Job Board API"""
         all_jobs = []
