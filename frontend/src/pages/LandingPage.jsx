@@ -77,10 +77,17 @@ export default function LandingPage() {
               Find Your H1B
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-teal-300"> Dream Job</span>
             </h1>
-            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed" style={{ animationDelay: "0.1s" }}>
+            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed" style={{ animationDelay: "0.1s" }}>
               Discover H1B sponsored positions with transparent wage levels. 
               Track your applications and find companies with proven visa sponsorship history.
             </p>
+
+            {/* REAL Jobs Banner */}
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 mb-8" style={{ animationDelay: "0.15s" }}>
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+              <span className="text-white font-semibold">🔴 LIVE: Real job postings from Stripe, Airbnb, GitLab & 15+ H1B sponsors</span>
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            </div>
 
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="max-w-2xl mx-auto" style={{ animationDelay: "0.2s" }}>
