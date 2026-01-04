@@ -346,18 +346,28 @@ class JobAggregator:
                     all_normalized_jobs.append(normalized)
             
             # Fetch from Greenhouse with public board tokens
-            # Using some well-known company board tokens (these are public)
+            # Using well-known H1B-sponsoring companies that use Greenhouse
             greenhouse_tokens = [
-                "gitlab",  # GitLab
-                "stripe",  # Stripe
-                "shopify", # Shopify
-                "netflix", # Netflix
-                "airbnb",  # Airbnb
-                "uber",    # Uber
-                "lyft",    # Lyft
-                "twitter", # Twitter/X
-                "meta",    # Meta
-                "google",  # Google
+                "gitlab",    # GitLab
+                "stripe",    # Stripe
+                "airbnb",    # Airbnb
+                "lyft",      # Lyft
+                "dropbox",   # Dropbox
+                "coinbase",  # Coinbase
+                "square",    # Square/Block
+                "robinhood", # Robinhood
+                "doordash",  # DoorDash
+                "instacart", # Instacart
+                "reddit",    # Reddit
+                "databricks",# Databricks
+                "snowflake", # Snowflake
+                "mongodb",   # MongoDB
+                "plaid",     # Plaid
+                "notion",    # Notion
+                "figma",     # Figma
+                "airtable",  # Airtable
+                "asana",     # Asana
+                "cloudflare",# Cloudflare
             ]
             
             greenhouse_jobs = await self.fetch_greenhouse_jobs(greenhouse_tokens)
