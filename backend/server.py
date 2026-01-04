@@ -33,6 +33,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Import job aggregator and scheduler
+from job_aggregator import JobAggregator
+from job_scheduler import JobScheduler
+
+# Initialize job aggregator and scheduler (will be started on app startup)
+job_aggregator = None
+job_scheduler = None
+
 # ================== MODELS ==================
 
 class User(BaseModel):
