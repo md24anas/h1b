@@ -255,10 +255,13 @@ async def get_jobs(
     min_salary: Optional[float] = None,
     max_salary: Optional[float] = None,
     company: Optional[str] = None,
+    category: Optional[str] = None,
+    opt_friendly: Optional[bool] = None,
+    stem_opt_friendly: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100
 ):
-    """Get jobs with filters"""
+    """Get jobs with filters including OPT/STEM OPT"""
     query = {}
     
     if search:
@@ -285,6 +288,55 @@ async def get_jobs(
     
     if company:
         query["company_name"] = {"$regex": company, "$options": "i"}
+    
+    # Category filter
+    if category:
+        category_keywords = {
+            "software": ["software", "engineer", "developer", "programmer"],
+            "data": ["data", "scientist", "analyst", "analytics"],
+            "cloud": ["cloud", "devops", "infrastructure", "sre", "site reliability"],
+            "security": ["security", "cybersecurity", "infosec"],
+            "product": ["product manager", "product owner", "pm"],
+            "design": ["designer", "ux", "ui", "design"],
+            "mobile": ["mobile", "ios", "android", "react native"],
+            "frontend": ["frontend", "front-end", "react", "vue", "angular"],
+            "backend": ["backend", "back-end", "api", "microservices"],
+            "fullstack": ["fullstack", "full-stack", "full stack"],
+            "ml": ["machine learning", "ml", "ai", "artificial intelligence"],
+            "hardware": ["hardware", "embedded", "firmware"],
+            "qa": ["qa", "quality", "test", "sdet"]
+        }
+        
+        if category in category_keywords:
+            keywords = category_keywords[category]
+            query["job_title"] = {"$regex": "|".join(keywords), "$options": "i"}
+    
+    # OPT/STEM OPT filter - check if company supports OPT
+    if opt_friendly or stem_opt_friendly:
+        # Get OPT-friendly companies
+        opt_query = {}
+        if opt_friendly:
+            opt_query["supports_opt"] = True
+        if stem_opt_friendly:
+            opt_query["supports_stem_opt"] = True
+        
+        opt_companies = await db.companies.find(opt_query, {"name": 1}).to_list(None)
+        opt_company_names = [c["name"] for c in opt_companies]
+        
+        if opt_company_names:
+            # Add company name filter
+            if "company_name" not in query:
+                query["company_name"] = {"$in": opt_company_names}
+            else:
+                # Combine with existing company filter
+                existing_regex = query["company_name"].get("$regex")
+                if existing_regex:
+                    query["$and"] = [
+                        {"company_name": {"$regex": existing_regex, "$options": "i"}},
+                        {"company_name": {"$in": opt_company_names}}
+                    ]
+                else:
+                    query["company_name"] = {"$in": opt_company_names}
     
     # Sort by: 1) external jobs first (is_external DESC), 2) posted_date DESC
     cursor = db.jobs.find(query, {"_id": 0}).skip(skip).limit(limit).sort([
