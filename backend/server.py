@@ -732,45 +732,6 @@ async def trigger_sync():
     
     return {"message": "Job sync triggered", "status": "running"}
 
-@api_router.get("/jobs/wage-prediction")
-async def predict_wage_level(
-    job_title: str,
-    state: str = "CA",
-    salary: float = 0
-):
-    """AI-powered wage level prediction"""
-    from wage_predictor import wage_predictor
-    
-    # Load data if not already loaded
-    if not wage_predictor.loaded:
-        wage_predictor.load_data()
-    
-    # Predict wage level
-    predicted_level = wage_predictor.predict_wage_level(job_title, state, salary)
-    
-    # Get suggested salary range for the predicted level
-    min_salary, max_salary = wage_predictor.get_suggested_salary_range(job_title, state, predicted_level)
-    
-    # Get OFLC wage data
-    wage_levels = wage_predictor.get_wage_levels_for_job(job_title, state)
-    
-    return {
-        "job_title": job_title,
-        "state": state,
-        "provided_salary": salary,
-        "predicted_level": predicted_level,
-        "suggested_salary_range": {
-            "min": round(min_salary, 2),
-            "max": round(max_salary, 2)
-        },
-        "oflc_wage_levels": {
-            "level1": round(wage_levels.get('level1', 0), 2) if wage_levels else 0,
-            "level2": round(wage_levels.get('level2', 0), 2) if wage_levels else 0,
-            "level3": round(wage_levels.get('level3', 0), 2) if wage_levels else 0,
-            "level4": round(wage_levels.get('level4', 0), 2) if wage_levels else 0,
-        } if wage_levels else None
-    }
-
 # Include the router
 app.include_router(api_router)
 
