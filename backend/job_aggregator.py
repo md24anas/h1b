@@ -9,6 +9,7 @@ from typing import List, Dict, Optional
 from datetime import datetime, timezone
 import asyncio
 import re
+from wage_predictor import wage_predictor
 
 logger = logging.getLogger(__name__)
 
