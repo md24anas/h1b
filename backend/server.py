@@ -256,7 +256,7 @@ async def get_jobs(
     max_salary: Optional[float] = None,
     company: Optional[str] = None,
     skip: int = 0,
-    limit: int = 20
+    limit: int = 100
 ):
     """Get jobs with filters"""
     query = {}
@@ -286,7 +286,11 @@ async def get_jobs(
     if company:
         query["company_name"] = {"$regex": company, "$options": "i"}
     
-    cursor = db.jobs.find(query, {"_id": 0}).skip(skip).limit(limit).sort("posted_date", -1)
+    # Sort by: 1) external jobs first (is_external DESC), 2) posted_date DESC
+    cursor = db.jobs.find(query, {"_id": 0}).skip(skip).limit(limit).sort([
+        ("is_external", -1),  # External jobs first
+        ("posted_date", -1)   # Then by date
+    ])
     jobs = await cursor.to_list(length=limit)
     
     total = await db.jobs.count_documents(query)
