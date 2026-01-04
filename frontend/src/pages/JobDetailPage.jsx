@@ -327,6 +327,8 @@ export default function JobDetailPage() {
                 These links will search for similar positions. Verify the exact job listing on the company's official careers page.
               </p>
             </div>
+
+            {/* Wage Level Card */}
             <div className="bg-white rounded-2xl p-8 border border-slate-200">
               <h2 className="text-xl font-bold text-slate-900 mb-6">Wage Level Information</h2>
               
