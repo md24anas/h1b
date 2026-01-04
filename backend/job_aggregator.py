@@ -457,6 +457,17 @@ class JobAggregator:
                 if normalized:
                     all_normalized_jobs.append(normalized)
             
+            # Fetch from USAJOBS (if API key is available)
+            usajobs_api_key = os.environ.get("USAJOBS_API_KEY")
+            if usajobs_api_key:
+                usajobs_jobs = await self.fetch_usajobs(usajobs_api_key)
+                for job_item in usajobs_jobs:
+                    normalized = self.normalize_usajobs_job(job_item, h1b_companies)
+                    if normalized:
+                        all_normalized_jobs.append(normalized)
+            else:
+                logger.info("USAJOBS_API_KEY not found in environment, skipping USAJOBS")
+            
             # Fetch from Greenhouse with public board tokens
             # Using well-known H1B-sponsoring companies that use Greenhouse
             greenhouse_tokens = [
