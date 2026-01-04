@@ -789,6 +789,8 @@ class JobAggregator:
             arbeitnow_count = await self.db.jobs.count_documents({"source": "arbeitnow"})
             greenhouse_count = await self.db.jobs.count_documents({"source": "greenhouse"})
             usajobs_count = await self.db.jobs.count_documents({"source": "usajobs"})
+            jsearch_count = await self.db.jobs.count_documents({"source": "jsearch"})
+            adzuna_count = await self.db.jobs.count_documents({"source": "adzuna"})
             internal_count = await self.db.jobs.count_documents({"is_external": {"$ne": True}})
             
             # Get last sync time
@@ -800,11 +802,15 @@ class JobAggregator:
             
             last_synced = last_job.get("last_synced") if last_job else None
             
+            total_external = arbeitnow_count + greenhouse_count + usajobs_count + jsearch_count + adzuna_count
+            
             return {
-                "total_external_jobs": arbeitnow_count + greenhouse_count + usajobs_count,
+                "total_external_jobs": total_external,
                 "arbeitnow_jobs": arbeitnow_count,
                 "greenhouse_jobs": greenhouse_count,
                 "usajobs_jobs": usajobs_count,
+                "jsearch_jobs": jsearch_count,
+                "adzuna_jobs": adzuna_count,
                 "internal_jobs": internal_count,
                 "last_synced": last_synced,
                 "status": "active"
