@@ -710,6 +710,55 @@ class JobAggregator:
             
             all_normalized_jobs = []
             
+            # Scrape from major company career websites
+            logger.info("Scraping from company career websites...")
+            
+            # Google
+            try:
+                google_jobs = await company_scraper.scrape_google_careers()
+                for job in google_jobs:
+                    normalized = company_scraper.normalize_google_job(job)
+                    if normalized:
+                        # Add wage level prediction
+                        normalized['wage_level'] = wage_predictor.predict_wage_level(
+                            normalized['job_title'],
+                            normalized['state'],
+                            normalized.get('base_salary', 0)
+                        )
+                        all_normalized_jobs.append(normalized)
+            except Exception as e:
+                logger.error(f"Error scraping Google: {e}")
+            
+            # Amazon
+            try:
+                amazon_jobs = await company_scraper.scrape_amazon_jobs()
+                for job in amazon_jobs:
+                    normalized = company_scraper.normalize_amazon_job(job)
+                    if normalized:
+                        normalized['wage_level'] = wage_predictor.predict_wage_level(
+                            normalized['job_title'],
+                            normalized['state'],
+                            normalized.get('base_salary', 0)
+                        )
+                        all_normalized_jobs.append(normalized)
+            except Exception as e:
+                logger.error(f"Error scraping Amazon: {e}")
+            
+            # Microsoft
+            try:
+                microsoft_jobs = await company_scraper.scrape_microsoft_careers()
+                for job in microsoft_jobs:
+                    normalized = company_scraper.normalize_microsoft_job(job)
+                    if normalized:
+                        normalized['wage_level'] = wage_predictor.predict_wage_level(
+                            normalized['job_title'],
+                            normalized['state'],
+                            normalized.get('base_salary', 0)
+                        )
+                        all_normalized_jobs.append(normalized)
+            except Exception as e:
+                logger.error(f"Error scraping Microsoft: {e}")
+            
             # Fetch from Arbeitnow
             arbeitnow_jobs = await self.fetch_arbeitnow_jobs()
             for job in arbeitnow_jobs:
