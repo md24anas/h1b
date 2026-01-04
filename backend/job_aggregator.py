@@ -201,14 +201,24 @@ class JobAggregator:
             token_to_company = {
                 "gitlab": "GitLab",
                 "stripe": "Stripe",
-                "shopify": "Shopify", 
-                "netflix": "Netflix",
                 "airbnb": "Airbnb",
-                "uber": "Uber",
                 "lyft": "Lyft",
-                "twitter": "Twitter",
-                "meta": "Meta",
-                "google": "Google"
+                "dropbox": "Dropbox",
+                "coinbase": "Coinbase",
+                "square": "Square",
+                "robinhood": "Robinhood",
+                "doordash": "DoorDash",
+                "instacart": "Instacart",
+                "reddit": "Reddit",
+                "databricks": "Databricks",
+                "snowflake": "Snowflake",
+                "mongodb": "MongoDB",
+                "plaid": "Plaid",
+                "notion": "Notion",
+                "figma": "Figma",
+                "airtable": "Airtable",
+                "asana": "Asana",
+                "cloudflare": "Cloudflare",
             }
             
             company_name = token_to_company.get(board_token.lower(), board_token.title())
