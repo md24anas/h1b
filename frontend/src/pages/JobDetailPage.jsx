@@ -241,14 +241,28 @@ export default function JobDetailPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button
-                      data-testid="apply-btn"
-                      onClick={() => handleApplyExternal('linkedin')}
-                      className="rounded-full px-6 bg-teal-500 hover:bg-teal-600"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Apply on LinkedIn
-                    </Button>
+                    {job.is_external && job.external_url ? (
+                      <Button
+                        data-testid="apply-btn"
+                        onClick={() => {
+                          window.open(job.external_url, '_blank');
+                          toast.success('Opening job posting...');
+                        }}
+                        className="rounded-full px-6 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Original Posting
+                      </Button>
+                    ) : (
+                      <Button
+                        data-testid="apply-btn"
+                        onClick={() => handleApplyExternal('linkedin')}
+                        className="rounded-full px-6 bg-teal-500 hover:bg-teal-600"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Apply on LinkedIn
+                      </Button>
+                    )}
                     <Button
                       data-testid="track-btn"
                       variant="outline"
