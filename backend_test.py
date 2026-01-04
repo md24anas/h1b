@@ -122,6 +122,68 @@ class H1BJobBoardTester:
         self.run_test("Get saved jobs (no auth)", "GET", "saved-jobs", 401)
         self.run_test("Get applications (no auth)", "GET", "applications", 401)
 
+    def test_job_sync_endpoints(self):
+        """Test real-time job aggregation endpoints"""
+        print("\n=== TESTING JOB SYNC ENDPOINTS ===")
+        
+        # Test sync status endpoint
+        success, status_data = self.run_test("Job sync status", "GET", "jobs/sync/status", 200)
+        if success:
+            print(f"   Sync status: {status_data.get('status', 'unknown')}")
+            print(f"   Total external jobs: {status_data.get('total_external_jobs', 0)}")
+            print(f"   Greenhouse jobs: {status_data.get('greenhouse_jobs', 0)}")
+            print(f"   Arbeitnow jobs: {status_data.get('arbeitnow_jobs', 0)}")
+            print(f"   Internal jobs: {status_data.get('internal_jobs', 0)}")
+            print(f"   Last synced: {status_data.get('last_synced', 'Never')}")
+            print(f"   Scheduler running: {status_data.get('running', False)}")
+        
+        # Test manual sync trigger
+        self.run_test("Manual sync trigger", "POST", "jobs/sync/trigger", 200)
+
+    def test_external_jobs(self):
+        """Test external job features"""
+        print("\n=== TESTING EXTERNAL JOBS ===")
+        
+        # Test jobs endpoint for external jobs
+        success, jobs_data = self.run_test("Get jobs with external data", "GET", "jobs?limit=50", 200)
+        if success and jobs_data.get('jobs'):
+            external_jobs = [job for job in jobs_data['jobs'] if job.get('is_external')]
+            internal_jobs = [job for job in jobs_data['jobs'] if not job.get('is_external')]
+            
+            print(f"   Found {len(external_jobs)} external jobs")
+            print(f"   Found {len(internal_jobs)} internal jobs")
+            
+            # Test external job details
+            if external_jobs:
+                external_job = external_jobs[0]
+                job_id = external_job['job_id']
+                print(f"   Testing external job: {job_id}")
+                print(f"   Source: {external_job.get('source', 'unknown')}")
+                print(f"   Company: {external_job.get('company_name', 'unknown')}")
+                print(f"   External URL: {external_job.get('external_url', 'none')}")
+                
+                # Test single external job endpoint
+                success, job_detail = self.run_test("Get external job detail", "GET", f"jobs/{job_id}", 200)
+                if success:
+                    print(f"   ✓ External job detail retrieved successfully")
+                    print(f"   Has external_url: {'external_url' in job_detail}")
+                    print(f"   Has source: {'source' in job_detail}")
+                    print(f"   Is external: {job_detail.get('is_external', False)}")
+            
+            # Test Greenhouse jobs specifically
+            greenhouse_jobs = [job for job in external_jobs if job.get('source') == 'greenhouse']
+            if greenhouse_jobs:
+                gh_job = greenhouse_jobs[0]
+                print(f"   Testing Greenhouse job: {gh_job['job_id']}")
+                print(f"   Company: {gh_job.get('company_name', 'unknown')}")
+                print(f"   External URL: {gh_job.get('external_url', 'none')}")
+                
+                # Verify Greenhouse job ID format
+                if gh_job['job_id'].startswith('gh_'):
+                    print(f"   ✓ Greenhouse job ID format correct")
+                else:
+                    print(f"   ❌ Greenhouse job ID format incorrect: {gh_job['job_id']}")
+
     def test_error_cases(self):
         """Test error handling"""
         print("\n=== TESTING ERROR CASES ===")
