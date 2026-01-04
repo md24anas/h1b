@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/job_aggregator.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Created job aggregation service with Arbeitnow and Greenhouse API integration. Smart H1B company matching implemented. Successfully fetching 2967 jobs from H1B sponsors."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Job aggregation working perfectly. Successfully fetching 3812 jobs from Greenhouse API across 15 H1B-sponsoring companies (Stripe, Airbnb, Lyft, Cloudflare, etc.). Smart company matching filters only H1B sponsors. All external jobs have proper source attribution, external_url, and is_external=true."
   
   - task: "Background Job Scheduler"
     implemented: true
@@ -123,11 +126,14 @@ backend:
     file: "/app/backend/job_scheduler.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "APScheduler configured to run job sync every 60 seconds. Scheduler starts on app startup and runs initial sync."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Background scheduler working correctly. Runs every 60 seconds as configured. Status endpoint shows scheduler running=true with proper job scheduling info."
   
   - task: "Extended H1BJob Model"
     implemented: true
@@ -135,11 +141,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Added fields: source, external_url, external_id, is_external, last_synced to H1BJob model"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Extended H1BJob model working correctly. All external jobs contain required fields: source (greenhouse/arbeitnow), external_url (real job posting URLs), external_id, is_external=true, last_synced timestamp."
   
   - task: "Sync Status Endpoints"
     implemented: true
@@ -147,11 +156,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Created GET /api/jobs/sync/status and POST /api/jobs/sync/trigger endpoints"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Sync endpoints working perfectly. GET /api/jobs/sync/status returns correct statistics (total_external_jobs: 3812, greenhouse_jobs: 3812, arbeitnow_jobs: 0, scheduler running: true). POST /api/jobs/sync/trigger successfully triggers manual sync."
 
 frontend:
   - task: "Source Badges on Job Cards"
