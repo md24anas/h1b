@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, DollarSign, Calendar, Briefcase, Heart, Share2, CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, DollarSign, Calendar, Briefcase, Heart, Share2, CheckCircle2, ExternalLink, Loader2, BookmarkPlus, Linkedin } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { toast } from "sonner";
@@ -8,6 +8,20 @@ import Navbar from "../components/Navbar";
 import WageLevelChart from "../components/WageLevelChart";
 
 const API = process.env.REACT_APP_BACKEND_URL + "/api";
+
+// Helper to generate job search URLs
+const getJobSearchUrls = (jobTitle, companyName, location) => {
+  const encodedTitle = encodeURIComponent(jobTitle);
+  const encodedCompany = encodeURIComponent(companyName);
+  const encodedLocation = encodeURIComponent(location);
+  
+  return {
+    linkedin: `https://www.linkedin.com/jobs/search/?keywords=${encodedTitle}%20${encodedCompany}&location=${encodedLocation}`,
+    indeed: `https://www.indeed.com/jobs?q=${encodedTitle}+${encodedCompany}&l=${encodedLocation}`,
+    glassdoor: `https://www.glassdoor.com/Job/jobs.htm?sc.keyword=${encodedTitle}%20${encodedCompany}`,
+    google: `https://www.google.com/search?q=${encodedTitle}+${encodedCompany}+jobs+${encodedLocation}`,
+  };
+};
 
 export default function JobDetailPage() {
   const { jobId } = useParams();
