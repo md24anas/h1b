@@ -203,6 +203,8 @@ def main():
     # Run all test suites
     tester.test_health_endpoints()
     tester.test_seed_endpoint()  # Seed first to ensure data exists
+    tester.test_job_sync_endpoints()  # Test new sync features
+    tester.test_external_jobs()  # Test external job features
     tester.test_jobs_endpoints()
     tester.test_companies_endpoints()
     tester.test_auth_endpoints()
