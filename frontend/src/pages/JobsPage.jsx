@@ -82,10 +82,17 @@ export default function JobsPage() {
       if (!params.has("limit")) {
         params.set("limit", "100");
       }
+      // Preserve skip parameter for pagination
+      const skip = params.get("skip") || "0";
+      params.set("skip", skip);
+      
       const res = await fetch(`${API}/jobs?${params}`);
       const data = await res.json();
       setJobs(data.jobs || []);
       setTotal(data.total || 0);
+      
+      // Scroll to top when changing pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
       console.error(e);
       toast.error("Failed to load jobs");
