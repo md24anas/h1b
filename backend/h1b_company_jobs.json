@@ -1,0 +1,18 @@
+[
+  {
+    "company": "Apple",
+    "title": "Hardware engineer",
+    "location": "Remote",
+    "url": "https://jobs.apple.com/en-us/search?search=%22Hardware+Engineer%22&sort=relevance&location=united-states-USA",
+    "id": "Apple_0",
+    "ats": "generic"
+  },
+  {
+    "company": "Apple",
+    "title": "Software engineer",
+    "location": "Remote",
+    "url": "https://jobs.apple.com/en-us/search?search=%22Software+Engineer%22&sort=relevance&location=united-states-USA",
+    "id": "Apple_1",
+    "ats": "generic"
+  }
+]
