@@ -313,6 +313,67 @@ class JobAggregator:
             logger.error(f"Error normalizing Greenhouse job: {e}")
             return None
     
+    def normalize_usajobs_job(self, job_item: Dict, h1b_companies: set) -> Optional[Dict]:
+        """Normalize USAJOBS job to our schema"""
+        try:
+            # USAJOBS wraps data in MatchedObjectDescriptor
+            job = job_item.get("MatchedObjectDescriptor", {})
+            
+            # Get organization name
+            org_name = job.get("OrganizationName", "")
+            
+            # Note: USAJOBS is government jobs, may not all be in H1B database
+            # We'll include them as they're official US government positions
+            
+            # Extract location
+            locations = job.get("PositionLocation", [])
+            if locations and len(locations) > 0:
+                location_data = locations[0]
+                city = location_data.get("CityName", "")
+                state_code = location_data.get("LocationName", "").split(",")[-1].strip()
+                location = f"{city}, {state_code}" if city else state_code
+                state = state_code if len(state_code) == 2 else "Various"
+            else:
+                location = "Various Locations"
+                state = "Various"
+            
+            # Get salary info
+            salary_min = job.get("PositionRemuneration", [{}])[0].get("MinimumRange", 0) if job.get("PositionRemuneration") else 0
+            salary_max = job.get("PositionRemuneration", [{}])[0].get("MaximumRange", 0) if job.get("PositionRemuneration") else 0
+            base_salary = (salary_min + salary_max) / 2 if salary_min and salary_max else salary_min or 0
+            
+            # Get application URL
+            apply_url = job.get("PositionURI", "")
+            
+            normalized = {
+                "job_id": f"usa_{job.get('PositionID', '')}",
+                "external_id": job.get("PositionID", ""),
+                "source": "usajobs",
+                "external_url": apply_url,
+                "job_title": job.get("PositionTitle", ""),
+                "company_name": org_name,
+                "company_id": f"comp_us_gov",
+                "location": location,
+                "state": state,
+                "wage_level": 2,  # Default
+                "base_salary": float(base_salary),
+                "prevailing_wage": 0,
+                "job_description": (job.get("UserArea", {}).get("Details", {}).get("JobSummary", ""))[:5000],
+                "requirements": self.extract_requirements(job.get("QualificationSummary", "")),
+                "benefits": [],
+                "visa_sponsorship": False,  # Government jobs typically don't sponsor
+                "posted_date": self.parse_date(job.get("PublicationStartDate")),
+                "employment_type": job.get("PositionSchedule", [{}])[0].get("Name", "Full-time") if job.get("PositionSchedule") else "Full-time",
+                "lca_case_number": None,
+                "is_external": True,
+                "last_synced": datetime.now(timezone.utc).isoformat()
+            }
+            
+            return normalized
+        except Exception as e:
+            logger.error(f"Error normalizing USAJOBS job: {e}")
+            return None
+    
     def extract_state(self, location: str) -> str:
         """Extract US state from location string"""
         if not location:
