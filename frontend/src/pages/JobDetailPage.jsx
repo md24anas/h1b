@@ -113,14 +113,23 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleApply = async () => {
+  // Open external job search (LinkedIn by default)
+  const handleApplyExternal = (platform = 'linkedin') => {
+    if (!job) return;
+    const urls = getJobSearchUrls(job.job_title, job.company_name, job.location);
+    window.open(urls[platform], '_blank');
+    toast.success(`Opening ${platform.charAt(0).toUpperCase() + platform.slice(1)} Jobs...`);
+  };
+
+  // Track application internally
+  const handleTrackApplication = async () => {
     if (!user) {
-      toast.error("Please sign in to apply");
+      toast.error("Please sign in to track applications");
       return;
     }
 
     if (hasApplied) {
-      toast.info("You've already applied to this job");
+      toast.info("You're already tracking this application");
       return;
     }
 
@@ -131,12 +140,12 @@ export default function JobDetailPage() {
       });
       if (res.ok) {
         setHasApplied(true);
-        toast.success("Application submitted!");
+        toast.success("Added to your application tracker!");
       } else {
         throw new Error();
       }
     } catch (e) {
-      toast.error("Failed to submit application");
+      toast.error("Failed to track application");
     }
   };
 
