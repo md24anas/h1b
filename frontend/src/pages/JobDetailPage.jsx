@@ -209,11 +209,17 @@ export default function JobDetailPage() {
                 </div>
 
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center flex-wrap gap-3 mb-2">
                     <h1 data-testid="job-title" className="text-2xl md:text-3xl font-bold text-slate-900">
                       {job.job_title}
                     </h1>
                     <Badge className={`wage-level-${job.wage_level}`}>Level {job.wage_level}</Badge>
+                    {job.is_external && job.source && (
+                      <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        {job.source === 'greenhouse' ? 'Greenhouse' : job.source === 'arbeitnow' ? 'Arbeitnow' : job.source.toUpperCase()}
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4 text-slate-600 mb-4">
