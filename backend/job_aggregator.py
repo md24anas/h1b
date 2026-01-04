@@ -409,18 +409,25 @@ class JobAggregator:
             content = job.get("content", {}) or {}
             description = content.get("description", "") if isinstance(content, dict) else ""
             
+            job_title = job.get("title", "")
+            
+            # AI-powered wage level prediction
+            # Try to extract salary from description or use 0
+            base_salary = 0
+            wage_level = wage_predictor.predict_wage_level(job_title, state, base_salary)
+            
             normalized = {
                 "job_id": f"gh_{job.get('id', '')}",
                 "external_id": str(job.get("id", "")),
                 "source": "greenhouse",
                 "external_url": job.get("absolute_url", ""),
-                "job_title": job.get("title", ""),
+                "job_title": job_title,
                 "company_name": company_name,
                 "company_id": f"comp_{self.normalize_company_name(company_name).replace(' ', '_')}",
                 "location": location,
                 "state": state,
-                "wage_level": 2,  # Default to level 2
-                "base_salary": 0,  # Not provided by Greenhouse
+                "wage_level": wage_level,  # AI-predicted
+                "base_salary": float(base_salary) if base_salary else 0,
                 "prevailing_wage": 0,
                 "job_description": description[:5000],
                 "requirements": self.extract_requirements(description),
