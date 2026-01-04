@@ -4,6 +4,7 @@ Fetches jobs from multiple public APIs and filters for H1B-sponsoring companies
 """
 import httpx
 import logging
+import os
 from typing import List, Dict, Optional
 from datetime import datetime, timezone
 import asyncio
