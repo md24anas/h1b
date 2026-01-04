@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 class H1BJobBoardTester:
-    def __init__(self, base_url="https://h1bwageguide.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://job-fetch-app.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
