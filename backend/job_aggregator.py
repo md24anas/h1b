@@ -541,6 +541,7 @@ class JobAggregator:
             # Count external jobs by source
             arbeitnow_count = await self.db.jobs.count_documents({"source": "arbeitnow"})
             greenhouse_count = await self.db.jobs.count_documents({"source": "greenhouse"})
+            usajobs_count = await self.db.jobs.count_documents({"source": "usajobs"})
             internal_count = await self.db.jobs.count_documents({"is_external": {"$ne": True}})
             
             # Get last sync time
@@ -553,9 +554,10 @@ class JobAggregator:
             last_synced = last_job.get("last_synced") if last_job else None
             
             return {
-                "total_external_jobs": arbeitnow_count + greenhouse_count,
+                "total_external_jobs": arbeitnow_count + greenhouse_count + usajobs_count,
                 "arbeitnow_jobs": arbeitnow_count,
                 "greenhouse_jobs": greenhouse_count,
+                "usajobs_jobs": usajobs_count,
                 "internal_jobs": internal_count,
                 "last_synced": last_synced,
                 "status": "active"
