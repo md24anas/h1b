@@ -361,13 +361,18 @@ export default function JobsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h3 className="font-semibold text-lg text-slate-900 group-hover:text-teal-600 transition-colors">
                                 {job.job_title}
                               </h3>
                               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border wage-level-${job.wage_level}`}>
                                 Level {job.wage_level}
                               </span>
+                              {job.is_external && job.source && (
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0">
+                                  {job.source === 'greenhouse' ? 'Live' : job.source === 'arbeitnow' ? 'Live' : 'Live'}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
                               <span className="flex items-center gap-1">
