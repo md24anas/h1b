@@ -498,6 +498,123 @@ class JobAggregator:
             logger.error(f"Error normalizing USAJOBS job: {e}")
             return None
     
+    def normalize_jsearch_job(self, job: Dict, h1b_companies: set) -> Optional[Dict]:
+        """Normalize JSearch/Google Jobs to our schema"""
+        try:
+            employer_name = job.get("employer_name", "")
+            
+            # Filter for H1B sponsors
+            if not self.is_h1b_sponsor(employer_name, h1b_companies):
+                return None
+            
+            logger.info(f"✓ Matched JSearch job from H1B sponsor: {employer_name}")
+            
+            # Extract location
+            location = job.get("job_city", "")
+            state = job.get("job_state", "")
+            if location and state:
+                location = f"{location}, {state}"
+            elif state:
+                location = state
+            else:
+                location = job.get("job_country", "USA")
+            
+            # Get salary
+            salary_min = job.get("job_min_salary")
+            salary_max = job.get("job_max_salary")
+            base_salary = 0
+            if salary_min and salary_max:
+                base_salary = (salary_min + salary_max) / 2
+            elif salary_min:
+                base_salary = salary_min
+            elif salary_max:
+                base_salary = salary_max
+            
+            normalized = {
+                "job_id": f"js_{job.get('job_id', '')}",
+                "external_id": job.get("job_id", ""),
+                "source": "jsearch",
+                "external_url": job.get("job_apply_link", job.get("job_google_link", "")),
+                "job_title": job.get("job_title", ""),
+                "company_name": employer_name,
+                "company_id": f"comp_{self.normalize_company_name(employer_name).replace(' ', '_')}",
+                "location": location,
+                "state": state or self.extract_state(location),
+                "wage_level": 2,
+                "base_salary": float(base_salary) if base_salary else 0,
+                "prevailing_wage": 0,
+                "job_description": job.get("job_description", "")[:5000],
+                "requirements": self.extract_requirements(job.get("job_description", "")),
+                "benefits": job.get("job_highlights", {}).get("Benefits", [])[:5] if job.get("job_highlights") else [],
+                "visa_sponsorship": job.get("job_is_remote", False),
+                "posted_date": self.parse_date(job.get("job_posted_at_datetime_utc")),
+                "employment_type": job.get("job_employment_type", "Full-time"),
+                "lca_case_number": None,
+                "is_external": True,
+                "last_synced": datetime.now(timezone.utc).isoformat()
+            }
+            
+            return normalized
+        except Exception as e:
+            logger.error(f"Error normalizing JSearch job: {e}")
+            return None
+    
+    def normalize_adzuna_job(self, job: Dict, h1b_companies: set) -> Optional[Dict]:
+        """Normalize Adzuna job to our schema"""
+        try:
+            company_name = job.get("company", {}).get("display_name", "") if isinstance(job.get("company"), dict) else ""
+            
+            # Filter for H1B sponsors
+            if not self.is_h1b_sponsor(company_name, h1b_companies):
+                return None
+            
+            logger.info(f"✓ Matched Adzuna job from H1B sponsor: {company_name}")
+            
+            # Extract location
+            location_area = job.get("location", {}).get("display_name", "") if isinstance(job.get("location"), dict) else ""
+            location_parts = location_area.split(",")
+            state = location_parts[-1].strip() if len(location_parts) > 1 else ""
+            
+            # Get salary
+            salary_min = job.get("salary_min")
+            salary_max = job.get("salary_max")
+            base_salary = 0
+            if salary_min and salary_max:
+                base_salary = (salary_min + salary_max) / 2
+            elif salary_min:
+                base_salary = salary_min
+            elif salary_max:
+                base_salary = salary_max
+            
+            normalized = {
+                "job_id": f"adz_{job.get('id', '')}",
+                "external_id": str(job.get("id", "")),
+                "source": "adzuna",
+                "external_url": job.get("redirect_url", ""),
+                "job_title": job.get("title", ""),
+                "company_name": company_name,
+                "company_id": f"comp_{self.normalize_company_name(company_name).replace(' ', '_')}",
+                "location": location_area,
+                "state": state or self.extract_state(location_area),
+                "wage_level": 2,
+                "base_salary": float(base_salary) if base_salary else 0,
+                "prevailing_wage": 0,
+                "job_description": job.get("description", "")[:5000],
+                "requirements": self.extract_requirements(job.get("description", "")),
+                "benefits": [],
+                "visa_sponsorship": True,
+                "posted_date": self.parse_date(job.get("created")),
+                "employment_type": job.get("contract_type", "Full-time"),
+                "lca_case_number": None,
+                "is_external": True,
+                "last_synced": datetime.now(timezone.utc).isoformat()
+            }
+            
+            return normalized
+        except Exception as e:
+            logger.error(f"Error normalizing Adzuna job: {e}")
+            return None
+    
     def extract_state(self, location: str) -> str:
         """Extract US state from location string"""
         if not location:
