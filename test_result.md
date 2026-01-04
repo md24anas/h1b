@@ -101,3 +101,147 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Build H1B job listing website + Integrate real jobs from public APIs (ZipRecruiter, Greenhouse, Indeed, LinkedIn)"
+
+backend:
+  - task: "Job Aggregation Service"
+    implemented: true
+    working: true
+    file: "/app/backend/job_aggregator.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created job aggregation service with Arbeitnow and Greenhouse API integration. Smart H1B company matching implemented. Successfully fetching 2967 jobs from H1B sponsors."
+  
+  - task: "Background Job Scheduler"
+    implemented: true
+    working: true
+    file: "/app/backend/job_scheduler.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "APScheduler configured to run job sync every 60 seconds. Scheduler starts on app startup and runs initial sync."
+  
+  - task: "Extended H1BJob Model"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added fields: source, external_url, external_id, is_external, last_synced to H1BJob model"
+  
+  - task: "Sync Status Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created GET /api/jobs/sync/status and POST /api/jobs/sync/trigger endpoints"
+
+frontend:
+  - task: "Source Badges on Job Cards"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/JobsPage.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added 'Live' badges for external jobs showing source (Greenhouse, Arbeitnow)"
+  
+  - task: "External Job Posting Links"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/JobDetailPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated apply button to use external_url when available. Shows 'View Original Posting' for external jobs"
+  
+  - task: "Source Badge on Job Detail"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/JobDetailPage.jsx"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added gradient source badge (Greenhouse/Arbeitnow) next to job title"
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Job Aggregation Service"
+    - "Background Job Scheduler"
+    - "External Job Posting Links"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Successfully implemented real-time job aggregation from public APIs:
+      
+      **BACKEND:**
+      1. ✅ Job Aggregation Service (job_aggregator.py)
+         - Fetches from Arbeitnow API (no auth required)
+         - Fetches from Greenhouse API (20+ H1B company boards)
+         - Smart company matching with flexible normalization
+         - Filters only H1B-sponsoring companies
+         - Currently pulling 2967 real jobs
+      
+      2. ✅ Background Scheduler (job_scheduler.py)
+         - APScheduler running every 60 seconds
+         - Auto-starts on app startup
+         - Graceful shutdown handling
+      
+      3. ✅ API Endpoints
+         - GET /api/jobs/sync/status - Shows sync statistics
+         - POST /api/jobs/sync/trigger - Manual sync trigger
+      
+      **FRONTEND:**
+      1. ✅ Source badges on job listings
+      2. ✅ Direct links to original job postings
+      3. ✅ "Live" indicators for external jobs
+      
+      **INTEGRATION STATUS:**
+      - Greenhouse: ✅ WORKING (2967 jobs from Stripe, Airbnb, Lyft, Cloudflare, etc.)
+      - Arbeitnow: ⚠️ No matches (mostly European companies, not in H1B database)
+      - ZipRecruiter: ❌ Requires partner API key (not public)
+      - Indeed: ❌ No public API available
+      - LinkedIn: ❌ Requires partner program access
+      
+      **TESTING NEEDED:**
+      1. Verify job sync endpoint returns correct data
+      2. Check external job links work correctly
+      3. Verify source badges display properly
+      4. Test that jobs update every minute
+      5. Confirm only H1B sponsors appear in results
