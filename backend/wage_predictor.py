@@ -182,19 +182,37 @@ class WageLevelPredictor:
             1-4: Predicted wage level
             2: Default if unable to determine
         """
-        if not salary or salary <= 0:
-            return 2  # Default to level 2
+        # Handle invalid states
+        if not state or state == "Remote" or len(state) > 2 or state in ["Various", "ID", "OR", "NE"]:
+            state = "CA"  # Default to California for remote/invalid
         
         # Get OFLC wage levels for this job/location
         wage_levels = self.get_wage_levels_for_job(job_title, state)
         
+        # If no salary provided, use job title patterns to estimate level
+        if not salary or salary <= 0:
+            title_lower = job_title.lower()
+            
+            # Senior/Staff/Principal = Level 3-4
+            if any(word in title_lower for word in ['senior', 'sr', 'staff', 'principal', 'lead', 'architect']):
+                return 3
+            # Junior/Entry/Associate = Level 1
+            elif any(word in title_lower for word in ['junior', 'jr', 'entry', 'associate', 'intern']):
+                return 1
+            # Manager/Director = Level 4
+            elif any(word in title_lower for word in ['manager', 'director', 'vp', 'head of']):
+                return 4
+            # Default mid-level = Level 2
+            else:
+                return 2
+        
         if not wage_levels:
             # Fallback: use general tech salary ranges
-            if salary < 80000:
+            if salary < 90000:
                 return 1
-            elif salary < 120000:
+            elif salary < 130000:
                 return 2
-            elif salary < 160000:
+            elif salary < 170000:
                 return 3
             else:
                 return 4
@@ -206,13 +224,12 @@ class WageLevelPredictor:
         level4 = wage_levels.get('level4', 0)
         
         # Determine which level the salary falls into
-        if salary < level1:
+        # Add 10% buffer for matching
+        if salary < level2 * 0.9:
             return 1
-        elif salary < level2:
-            return 1
-        elif salary < level3:
+        elif salary < level3 * 0.9:
             return 2
-        elif salary < level4:
+        elif salary < level4 * 0.9:
             return 3
         else:
             return 4
