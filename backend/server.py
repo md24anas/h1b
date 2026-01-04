@@ -663,6 +663,32 @@ async def root():
 async def health():
     return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
+@api_router.get("/jobs/sync/status")
+async def get_sync_status():
+    """Get job sync status"""
+    if not job_aggregator:
+        return {"status": "not_initialized"}
+    
+    agg_status = await job_aggregator.get_sync_status()
+    
+    if job_scheduler:
+        scheduler_status = job_scheduler.get_status()
+        agg_status.update(scheduler_status)
+    
+    return agg_status
+
+@api_router.post("/jobs/sync/trigger")
+async def trigger_sync():
+    """Manually trigger job sync"""
+    if not job_aggregator:
+        raise HTTPException(status_code=503, detail="Job aggregator not initialized")
+    
+    # Run sync in background
+    import asyncio
+    asyncio.create_task(job_aggregator.sync_jobs())
+    
+    return {"message": "Job sync triggered", "status": "running"}
+
 # Include the router
 app.include_router(api_router)
 
@@ -675,6 +701,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize and start job aggregator on startup"""
+    global job_aggregator, job_scheduler
+    
+    logger.info("Starting H1B Job Board API...")
+    logger.info("Initializing job aggregator and scheduler...")
+    
+    job_aggregator = JobAggregator(db)
+    job_scheduler = JobScheduler(job_aggregator)
+    
+    # Start the scheduler
+    job_scheduler.start()
+    
+    logger.info("Job aggregator and scheduler initialized successfully!")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    """Cleanup on shutdown"""
+    global job_aggregator, job_scheduler
+    
+    logger.info("Shutting down...")
+    
+    if job_scheduler:
+        job_scheduler.stop()
+    
+    if job_aggregator:
+        await job_aggregator.close()
+    
     client.close()
+    logger.info("Shutdown complete")
