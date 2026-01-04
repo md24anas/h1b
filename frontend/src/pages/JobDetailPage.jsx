@@ -234,24 +234,32 @@ export default function JobDetailPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
                     <Button
                       data-testid="apply-btn"
-                      onClick={handleApply}
+                      onClick={() => handleApplyExternal('linkedin')}
+                      className="rounded-full px-6 bg-teal-500 hover:bg-teal-600"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Apply on LinkedIn
+                    </Button>
+                    <Button
+                      data-testid="track-btn"
+                      variant="outline"
+                      onClick={handleTrackApplication}
                       disabled={hasApplied}
-                      className={`rounded-full px-8 ${
-                        hasApplied
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-teal-500 hover:bg-teal-600"
-                      }`}
+                      className={`rounded-full ${hasApplied ? "border-green-300 text-green-600" : ""}`}
                     >
                       {hasApplied ? (
                         <>
                           <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Applied
+                          Tracking
                         </>
                       ) : (
-                        "Apply Now"
+                        <>
+                          <BookmarkPlus className="h-4 w-4 mr-2" />
+                          Track Application
+                        </>
                       )}
                     </Button>
                     <Button
