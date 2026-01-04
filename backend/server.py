@@ -82,6 +82,8 @@ class H1BJob(BaseModel):
     external_id: Optional[str] = None  # Unique ID from source
     is_external: Optional[bool] = False  # True for jobs from external APIs
     last_synced: Optional[str] = None  # Last sync timestamp
+    # Cap-exempt status
+    cap_exempt: Optional[bool] = False  # True for universities, non-profits, research orgs
 
 class Company(BaseModel):
     model_config = ConfigDict(extra="ignore")
