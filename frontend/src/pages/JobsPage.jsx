@@ -430,6 +430,59 @@ export default function JobsPage() {
                 ))}
               </div>
             )}
+            
+            {/* Pagination */}
+            {!loading && jobs.length > 0 && (
+              <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-6">
+                <div className="text-sm text-slate-600">
+                  Showing <span className="font-semibold">{jobs.length}</span> of{" "}
+                  <span className="font-semibold">{total}</span> jobs
+                </div>
+                
+                {total > 100 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+                        const currentSkip = parseInt(params.get("skip") || "0");
+                        if (currentSkip > 0) {
+                          params.set("skip", Math.max(0, currentSkip - 100).toString());
+                          setSearchParams(params);
+                        }
+                      }}
+                      disabled={parseInt(searchParams.get("skip") || "0") === 0}
+                      className="rounded-full"
+                    >
+                      Previous
+                    </Button>
+                    
+                    <span className="text-sm text-slate-600 px-4">
+                      Page {Math.floor(parseInt(searchParams.get("skip") || "0") / 100) + 1} of{" "}
+                      {Math.ceil(total / 100)}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+                        const currentSkip = parseInt(params.get("skip") || "0");
+                        if (currentSkip + 100 < total) {
+                          params.set("skip", (currentSkip + 100).toString());
+                          setSearchParams(params);
+                        }
+                      }}
+                      disabled={parseInt(searchParams.get("skip") || "0") + jobs.length >= total}
+                      className="rounded-full"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </main>
         </div>
       </div>
