@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import asyncio
 import re
 from wage_predictor import wage_predictor
+from company_scraper import company_scraper
 
 logger = logging.getLogger(__name__)
 
