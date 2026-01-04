@@ -36,6 +36,11 @@ Build a professional H1B job listing website which displays wage levels.
 - [x] Wage level statistics endpoint
 - [x] **Real USCIS FY2025 data: 500 companies, 617 jobs**
 - [x] Import script for USCIS employer disclosure data
+- [x] **Job Aggregation Service - Real-time job scraping from public APIs**
+- [x] **Greenhouse API Integration - Fetches jobs from 20+ H1B sponsors**
+- [x] **Arbeitnow API Integration - European/Remote jobs**
+- [x] **Background scheduler - Updates jobs every 60 seconds**
+- [x] **Smart company matching - Filters only H1B-sponsoring companies**
 
 ### Frontend (React + Tailwind + Recharts)
 - [x] Landing page with hero search bar
@@ -43,7 +48,9 @@ Build a professional H1B job listing website which displays wage levels.
 - [x] Featured jobs section
 - [x] Jobs listing page with glassmorphism filter sidebar
 - [x] Job detail page with wage level info and comparison chart
-- [x] **"Apply on LinkedIn" button - redirects to real job searches**
+- [x] **"View Original Posting" button - Direct links to real job postings**
+- [x] **Source badges showing job origin (Greenhouse, Arbeitnow)**
+- [x] **"Live" badges on external jobs**
 - [x] **"Find this job on" section with LinkedIn, Indeed, Glassdoor, Google**
 - [x] **"Track Application" button for internal tracking**
 - [x] Companies listing page with H1B approval stats
