@@ -31,33 +31,73 @@ class JobAggregator:
             for comp in companies:
                 name = comp.get("name", "").lower().strip()
                 if name:
+                    normalized = self.normalize_company_name(name)
+                    company_names.add(normalized)
+                    # Also add the original (in case it's already clean)
                     company_names.add(name)
-                    # Also add variations without common suffixes
-                    for suffix in [" inc", " inc.", " llc", " corp", " corporation", " ltd", " limited"]:
-                        if name.endswith(suffix):
-                            company_names.add(name.replace(suffix, "").strip())
             
-            logger.info(f"Loaded {len(company_names)} H1B-sponsoring company names")
+            logger.info(f"Loaded {len(company_names)} H1B-sponsoring company name variations")
             return company_names
         except Exception as e:
             logger.error(f"Error loading H1B companies: {e}")
             return set()
     
     def normalize_company_name(self, name: str) -> str:
-        """Normalize company name for matching"""
+        """Normalize company name for matching - more aggressive normalization"""
         if not name:
             return ""
+        
         name = name.lower().strip()
-        # Remove common suffixes
-        for suffix in [" inc", " inc.", " llc", " corp", " corporation", " ltd", " limited", " co.", " co"]:
+        
+        # Remove common legal suffixes and variations
+        suffixes = [
+            " incorporated", " inc.", " inc", 
+            " limited liability company", " llc", " l.l.c.", " l.l.c",
+            " corporation", " corp.", " corp",
+            " limited", " ltd.", " ltd",
+            " company", " co.", " co",
+            " llp", " l.l.p.",
+            " technologies", " technology",
+            " platforms", " platform",
+            " services", " service"
+        ]
+        
+        for suffix in suffixes:
             if name.endswith(suffix):
-                name = name.replace(suffix, "").strip()
+                name = name[:-len(suffix)].strip()
+        
+        # Remove special characters and extra spaces
+        name = name.replace(",", "").replace(".", "").replace("-", " ")
+        name = " ".join(name.split())  # Normalize whitespace
+        
         return name
     
     def is_h1b_sponsor(self, company_name: str, h1b_companies: set) -> bool:
-        """Check if company sponsors H1B"""
+        """Check if company sponsors H1B - uses flexible matching"""
+        if not company_name:
+            return False
+            
+        # Try exact match first
         normalized = self.normalize_company_name(company_name)
-        return normalized in h1b_companies
+        if normalized in h1b_companies:
+            return True
+        
+        # Try with original casing
+        if company_name.lower().strip() in h1b_companies:
+            return True
+        
+        # Try partial match - if normalized name is a substring of any H1B company
+        # or vice versa (for companies like "Google" vs "Google LLC")
+        for h1b_company in h1b_companies:
+            if len(normalized) >= 4 and len(h1b_company) >= 4:  # Avoid very short matches
+                if normalized in h1b_company or h1b_company in normalized:
+                    # Additional check: the match should be substantial (at least 70% of the shorter name)
+                    shorter = min(len(normalized), len(h1b_company))
+                    longer = max(len(normalized), len(h1b_company))
+                    if shorter / longer >= 0.7:
+                        return True
+        
+        return False
     
     async def fetch_arbeitnow_jobs(self) -> List[Dict]:
         """Fetch jobs from Arbeitnow API (no auth required)"""
