@@ -78,7 +78,10 @@ export default function JobsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams(searchParams);
-      params.set("limit", "20");
+      // Set default limit to 100 if not specified
+      if (!params.has("limit")) {
+        params.set("limit", "100");
+      }
       const res = await fetch(`${API}/jobs?${params}`);
       const data = await res.json();
       setJobs(data.jobs || []);
