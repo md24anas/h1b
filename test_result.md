@@ -210,9 +210,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Job Aggregation Service"
-    - "Background Job Scheduler"
+    - "Source Badges on Job Cards"
     - "External Job Posting Links"
+    - "Source Badge on Job Detail"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
