@@ -698,7 +698,30 @@ class JobAggregator:
                 if normalized:
                     all_normalized_jobs.append(normalized)
             
-            # Fetch from USAJOBS (if API key is available)
+            # Fetch from JSearch (RapidAPI - Google Jobs)
+            jsearch_api_key = os.environ.get("JSEARCH_API_KEY")
+            if jsearch_api_key:
+                jsearch_jobs = await self.fetch_jsearch_jobs(jsearch_api_key)
+                for job in jsearch_jobs:
+                    normalized = self.normalize_jsearch_job(job, h1b_companies)
+                    if normalized:
+                        all_normalized_jobs.append(normalized)
+            else:
+                logger.info("JSEARCH_API_KEY not found in environment, skipping JSearch")
+            
+            # Fetch from Adzuna
+            adzuna_app_id = os.environ.get("ADZUNA_APP_ID")
+            adzuna_app_key = os.environ.get("ADZUNA_APP_KEY")
+            if adzuna_app_id and adzuna_app_key:
+                adzuna_jobs = await self.fetch_adzuna_jobs(adzuna_app_id, adzuna_app_key)
+                for job in adzuna_jobs:
+                    normalized = self.normalize_adzuna_job(job, h1b_companies)
+                    if normalized:
+                        all_normalized_jobs.append(normalized)
+            else:
+                logger.info("Adzuna API credentials not found, skipping Adzuna")
+            
+            # Fetch from USAJOBS
             usajobs_api_key = os.environ.get("USAJOBS_API_KEY")
             if usajobs_api_key:
                 usajobs_jobs = await self.fetch_usajobs(usajobs_api_key)
@@ -710,28 +733,11 @@ class JobAggregator:
                 logger.info("USAJOBS_API_KEY not found in environment, skipping USAJOBS")
             
             # Fetch from Greenhouse with public board tokens
-            # Using well-known H1B-sponsoring companies that use Greenhouse
             greenhouse_tokens = [
-                "gitlab",    # GitLab
-                "stripe",    # Stripe
-                "airbnb",    # Airbnb
-                "lyft",      # Lyft
-                "dropbox",   # Dropbox
-                "coinbase",  # Coinbase
-                "square",    # Square/Block
-                "robinhood", # Robinhood
-                "doordash",  # DoorDash
-                "instacart", # Instacart
-                "reddit",    # Reddit
-                "databricks",# Databricks
-                "snowflake", # Snowflake
-                "mongodb",   # MongoDB
-                "plaid",     # Plaid
-                "notion",    # Notion
-                "figma",     # Figma
-                "airtable",  # Airtable
-                "asana",     # Asana
-                "cloudflare",# Cloudflare
+                "gitlab", "stripe", "airbnb", "lyft", "dropbox", "coinbase",
+                "square", "robinhood", "doordash", "instacart", "reddit",
+                "databricks", "snowflake", "mongodb", "plaid", "notion",
+                "figma", "airtable", "asana", "cloudflare",
             ]
             
             greenhouse_jobs = await self.fetch_greenhouse_jobs(greenhouse_tokens)
