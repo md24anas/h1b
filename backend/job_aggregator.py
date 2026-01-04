@@ -538,17 +538,22 @@ class JobAggregator:
             elif salary_max:
                 base_salary = salary_max
             
+            job_title = job.get("job_title", "")
+            
+            # AI-powered wage level prediction
+            wage_level = wage_predictor.predict_wage_level(job_title, state, base_salary)
+            
             normalized = {
                 "job_id": f"js_{job.get('job_id', '')}",
                 "external_id": job.get("job_id", ""),
                 "source": "jsearch",
                 "external_url": job.get("job_apply_link", job.get("job_google_link", "")),
-                "job_title": job.get("job_title", ""),
+                "job_title": job_title,
                 "company_name": employer_name,
                 "company_id": f"comp_{self.normalize_company_name(employer_name).replace(' ', '_')}",
                 "location": location,
                 "state": state or self.extract_state(location),
-                "wage_level": 2,
+                "wage_level": wage_level,  # AI-predicted
                 "base_salary": float(base_salary) if base_salary else 0,
                 "prevailing_wage": 0,
                 "job_description": job.get("job_description", "")[:5000],
