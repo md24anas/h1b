@@ -43,6 +43,9 @@ Build a professional H1B job listing website which displays wage levels.
 - [x] Featured jobs section
 - [x] Jobs listing page with glassmorphism filter sidebar
 - [x] Job detail page with wage level info and comparison chart
+- [x] **"Apply on LinkedIn" button - redirects to real job searches**
+- [x] **"Find this job on" section with LinkedIn, Indeed, Glassdoor, Google**
+- [x] **"Track Application" button for internal tracking**
 - [x] Companies listing page with H1B approval stats
 - [x] Company detail page with open positions
 - [x] User dashboard (saved jobs, application tracking)
