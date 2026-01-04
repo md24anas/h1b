@@ -194,7 +194,24 @@ class JobAggregator:
     def normalize_greenhouse_job(self, job: Dict, h1b_companies: set) -> Optional[Dict]:
         """Normalize Greenhouse job to our schema"""
         try:
-            company_name = job.get("company", {}).get("name", "") if isinstance(job.get("company"), dict) else ""
+            # Greenhouse doesn't include company name in JSON, derive from board_token
+            board_token = job.get("board_token", "")
+            
+            # Map board tokens to proper company names
+            token_to_company = {
+                "gitlab": "GitLab",
+                "stripe": "Stripe",
+                "shopify": "Shopify", 
+                "netflix": "Netflix",
+                "airbnb": "Airbnb",
+                "uber": "Uber",
+                "lyft": "Lyft",
+                "twitter": "Twitter",
+                "meta": "Meta",
+                "google": "Google"
+            }
+            
+            company_name = token_to_company.get(board_token.lower(), board_token.title())
             
             # Filter for H1B sponsors
             if not self.is_h1b_sponsor(company_name, h1b_companies):
