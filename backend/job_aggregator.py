@@ -117,6 +117,47 @@ class JobAggregator:
             logger.error(f"Error fetching from Arbeitnow: {e}")
             return []
     
+    async def fetch_usajobs(self, api_key: Optional[str] = None) -> List[Dict]:
+        """Fetch jobs from USAJOBS API (requires API key)"""
+        if not api_key:
+            logger.info("USAJOBS API key not provided, skipping...")
+            return []
+        
+        try:
+            logger.info("Fetching jobs from USAJOBS...")
+            
+            # USAJOBS API requires specific headers
+            headers = {
+                "Host": "data.usajobs.gov",
+                "User-Agent": "h1b-job-board-app",
+                "Authorization-Key": api_key
+            }
+            
+            # Search for jobs with H1B keywords
+            params = {
+                "Keyword": "software engineer OR data scientist OR developer",
+                "ResultsPerPage": "100",
+                "Page": "1"
+            }
+            
+            response = await self.http_client.get(
+                "https://data.usajobs.gov/api/search",
+                headers=headers,
+                params=params
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                jobs = data.get("SearchResult", {}).get("SearchResultItems", [])
+                logger.info(f"Fetched {len(jobs)} jobs from USAJOBS")
+                return jobs
+            else:
+                logger.error(f"USAJOBS API error: {response.status_code}")
+                return []
+        except Exception as e:
+            logger.error(f"Error fetching from USAJOBS: {e}")
+            return []
+    
     async def fetch_greenhouse_jobs(self, board_tokens: List[str]) -> List[Dict]:
         """Fetch jobs from Greenhouse Job Board API"""
         all_jobs = []
