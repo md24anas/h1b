@@ -152,7 +152,10 @@ class JobAggregator:
             
             # Filter for H1B sponsors
             if not self.is_h1b_sponsor(company_name, h1b_companies):
+                logger.debug(f"Skipping Arbeitnow job - company '{company_name}' not an H1B sponsor")
                 return None
+            
+            logger.info(f"✓ Matched Arbeitnow job from H1B sponsor: {company_name}")
             
             # Extract location info
             location = job.get("location", "Remote")
