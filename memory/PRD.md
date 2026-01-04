@@ -34,7 +34,8 @@ Build a professional H1B job listing website which displays wage levels.
 - [x] Saved jobs CRUD (authenticated users)
 - [x] Job applications with status tracking
 - [x] Wage level statistics endpoint
-- [x] Seed data with 20 jobs and 8 major tech companies
+- [x] **Real USCIS FY2025 data: 500 companies, 617 jobs**
+- [x] Import script for USCIS employer disclosure data
 
 ### Frontend (React + Tailwind + Recharts)
 - [x] Landing page with hero search bar
