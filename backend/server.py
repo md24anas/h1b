@@ -349,6 +349,40 @@ async def get_jobs(
     
     return {"jobs": jobs, "total": total, "skip": skip, "limit": limit}
 
+@api_router.get("/jobs/categories")
+async def get_job_categories():
+    """Get job categories with counts"""
+    categories = [
+        {"id": "software", "name": "Software Engineering", "keywords": ["software", "engineer", "developer"]},
+        {"id": "data", "name": "Data & Analytics", "keywords": ["data", "scientist", "analyst"]},
+        {"id": "cloud", "name": "Cloud & DevOps", "keywords": ["cloud", "devops", "infrastructure"]},
+        {"id": "security", "name": "Security", "keywords": ["security", "cybersecurity"]},
+        {"id": "product", "name": "Product Management", "keywords": ["product manager", "pm"]},
+        {"id": "design", "name": "Design", "keywords": ["designer", "ux", "ui"]},
+        {"id": "mobile", "name": "Mobile Development", "keywords": ["mobile", "ios", "android"]},
+        {"id": "frontend", "name": "Frontend", "keywords": ["frontend", "react", "vue"]},
+        {"id": "backend", "name": "Backend", "keywords": ["backend", "api", "microservices"]},
+        {"id": "fullstack", "name": "Full Stack", "keywords": ["fullstack", "full stack"]},
+        {"id": "ml", "name": "Machine Learning / AI", "keywords": ["machine learning", "ml", "ai"]},
+        {"id": "hardware", "name": "Hardware", "keywords": ["hardware", "embedded"]},
+        {"id": "qa", "name": "QA / Testing", "keywords": ["qa", "test", "quality"]}
+    ]
+    
+    # Get counts for each category
+    result = []
+    for cat in categories:
+        regex = "|".join(cat["keywords"])
+        count = await db.jobs.count_documents({
+            "job_title": {"$regex": regex, "$options": "i"}
+        })
+        result.append({
+            "id": cat["id"],
+            "name": cat["name"],
+            "count": count
+        })
+    
+    return {"categories": result}
+
 @api_router.get("/jobs/wage-prediction")
 async def predict_wage_level_endpoint(
     job_title: str,
